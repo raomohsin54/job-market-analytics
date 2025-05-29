@@ -1,0 +1,43 @@
+{
+    "name": "DS_IgnestionControl",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "LS_SQL_JobMarketDW",
+            "type": "LinkedServiceReference"
+        },
+        "annotations": [],
+        "type": "SqlServerTable",
+        "schema": [
+            {
+                "name": "SourceName",
+                "type": "nvarchar"
+            },
+            {
+                "name": "SourceType",
+                "type": "nvarchar"
+            },
+            {
+                "name": "IsActive",
+                "type": "bit"
+            },
+            {
+                "name": "TargetTable",
+                "type": "nvarchar"
+            },
+            {
+                "name": "LastIngested",
+                "type": "datetime",
+                "precision": 23,
+                "scale": 3
+            },
+            {
+                "name": "Parameters",
+                "type": "nvarchar"
+            }
+        ],
+        "typeProperties": {
+            "schema": "HRDW",
+            "table": "IngestionControl"
+        }
+    }
+}

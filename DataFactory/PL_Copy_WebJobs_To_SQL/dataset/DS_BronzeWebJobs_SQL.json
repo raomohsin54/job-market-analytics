@@ -1,0 +1,47 @@
+{
+    "name": "DS_BronzeWebJobs_SQL",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "LS_SQL_JobMarketDW",
+            "type": "LinkedServiceReference"
+        },
+        "annotations": [],
+        "type": "SqlServerTable",
+        "schema": [
+            {
+                "name": "JobTitle",
+                "type": "nvarchar"
+            },
+            {
+                "name": "Company",
+                "type": "nvarchar"
+            },
+            {
+                "name": "Location",
+                "type": "nvarchar"
+            },
+            {
+                "name": "City",
+                "type": "nvarchar"
+            },
+            {
+                "name": "Summary",
+                "type": "nvarchar"
+            },
+            {
+                "name": "Link",
+                "type": "nvarchar"
+            },
+            {
+                "name": "LoadTimestamp",
+                "type": "datetime",
+                "precision": 23,
+                "scale": 3
+            }
+        ],
+        "typeProperties": {
+            "schema": "HRDW",
+            "table": "Bronze_WebJobs"
+        }
+    }
+}

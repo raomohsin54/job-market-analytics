@@ -1,0 +1,105 @@
+{
+    "name": "PL_Master_IngestionController",
+    "properties": {
+        "activities": [
+            {
+                "name": "Lookup_IngestionControl",
+                "type": "Lookup",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "SqlServerSource",
+                        "sqlReaderQuery": "SELECT * FROM HRDW.IngestionControl WHERE IsActive = 1\n",
+                        "queryTimeout": "02:00:00",
+                        "partitionOption": "None"
+                    },
+                    "dataset": {
+                        "referenceName": "DS_IgnestionControl",
+                        "type": "DatasetReference"
+                    },
+                    "firstRowOnly": false
+                }
+            },
+            {
+                "name": "ForEach_IngestionSources",
+                "type": "ForEach",
+                "dependsOn": [
+                    {
+                        "activity": "Lookup_IngestionControl",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "userProperties": [],
+                "typeProperties": {
+                    "items": {
+                        "value": "@activity('Lookup_IngestionControl').output.value",
+                        "type": "Expression"
+                    },
+                    "activities": [
+                        {
+                            "name": "Switch_SourceType",
+                            "type": "Switch",
+                            "dependsOn": [],
+                            "userProperties": [],
+                            "typeProperties": {
+                                "on": {
+                                    "value": "@item().SourceType",
+                                    "type": "Expression"
+                                },
+                                "cases": [
+                                    {
+                                        "value": "WEB",
+                                        "activities": [
+                                            {
+                                                "name": "Execute_WebCopyPipeline",
+                                                "type": "ExecutePipeline",
+                                                "dependsOn": [],
+                                                "policy": {
+                                                    "secureInput": false
+                                                },
+                                                "userProperties": [],
+                                                "typeProperties": {
+                                                    "pipeline": {
+                                                        "referenceName": "PL_Copy_WebJobs_To_SQL",
+                                                        "type": "PipelineReference"
+                                                    },
+                                                    "waitOnCompletion": true,
+                                                    "parameters": {
+                                                        "targetTable": "@item().TargetTable\n",
+                                                        "parameters": {
+                                                            "value": "@item().Parameters\n",
+                                                            "type": "Expression"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "variables": {
+            "paramCheck": {
+                "type": "String"
+            },
+            "rawParamString": {
+                "type": "String"
+            }
+        },
+        "annotations": []
+    }
+}
