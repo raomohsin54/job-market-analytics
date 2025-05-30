@@ -1,12 +1,14 @@
 # 📊 Job Market Analytics Platform
 
-A hybrid data engineering project combining internal structured data from **SQL Server** and external web scraping (e.g., job ads from SEEK) using a **Metadata-Driven Architecture** in **Azure Data Factory**, processed in **Databricks**, and visualized in **Power BI**.
+[![Awesome Badge](https://img.shields.io/badge/Awesome-Project-brightgreen.svg)](https://github.com/raomohsin54/job-market-analytics)
+
+A comprehensive hybrid data engineering project designed to analyze job market trends by integrating internal structured data from **SQL Server** with external job postings scraped from platforms like **SEEK**. This project leverages a **Metadata-Driven Architecture** orchestrated in **Azure Data Factory**, processed and transformed in **Databricks**, and visualized through insightful dashboards in **Power BI**.
 
 ---
 
 ## 📌 Project Overview
 
-This project demonstrates an end-to-end **Modern Data Platform** to analyze job market trends across major Australian cities (Perth, Sydney, Melbourne) by integrating internal HR data with external job postings scraped from the web.
+This project showcases the development of a complete **Modern Data Platform** focused on providing valuable insights into job market dynamics across major Australian cities, including Perth, Sydney, and Melbourne. By seamlessly combining internal HR data with publicly available job advertisements, the platform enables a holistic understanding of recruitment trends and market demands. The use of a metadata-driven approach ensures scalability, maintainability, and automation of the data ingestion pipelines.
 
 ---
 
@@ -18,116 +20,98 @@ This project demonstrates an end-to-end **Modern Data Platform** to analyze job 
 
 ## 🛠️ Technologies Used
 
-| Layer                  | Tools / Services                           |
-|------------------------|--------------------------------------------|
-| **Data Source**        | SQL Server (On-Prem), Web Scraping (Python)|
-| **Orchestration**      | Azure Data Factory (ADF)                   |
-| **Transformation**     | Azure Databricks (Bronze → Silver → Gold)  |
-| **Storage**            | Delta Lake on Azure Data Lake              |
-| **Visualization**      | Power BI                                   |
-| **Control**            | Metadata-Driven Ingestion Table (SQL)      |
-| **Version Control**    | GitHub                                      |
+This project utilizes a suite of cutting-edge technologies across different layers of the data platform:
 
----
-
-## 🗃️ Folder Structure
-
-```bash
-📁 job-market-analytics/
-├── 📂 data-ingestion/
-│   ├── ingestion_control.sql
-│   └── dim_fact_tables.sql
-├── 📂 adf-pipelines/
-│   └── metadata-driven-adf.json
-├── 📂 databricks/
-│   ├── bronze_to_silver_notebook.py
-│   ├── silver_to_gold_notebook.py
-│   └── web_scrape_seek.py
-├── 📂 powerbi/
-│   └── job-market-dashboard.pbix
-├── 📂 images/
-│   └── architecture-diagram.png
-└── README.md
+| Layer                     | Tools / Services                             |
+| :-------------------------- | :------------------------------------------- |
+| **Data Source** | SQL Server (On-Prem), Web Scraping (Python) |
+| **Orchestration** | Azure Data Factory (ADF)                     |
+| **Transformation** | Azure Databricks (Bronze → Silver → Gold)    |
+| **Storage** | Delta Lake on Azure Data Lake                |
+| **Visualization** | Power BI                                   |
+| **Control** | Metadata-Driven Ingestion Table (SQL)        |
+| **Version Control** | GitHub                                     |
 
 ---
 
 ## 📅 Use Case Description
-Analyze internal job openings across departments and locations.
 
-Scrape and analyze external job listings (from SEEK) by city, title, and summary.
+This platform addresses several key use cases:
 
-Combine and enrich both datasets for comparative market insights.
-
-Enable metadata-driven automation for scalable ingestion pipelines.
+* **Internal Job Analytics:** Analyze internal job openings based on departments and geographical locations.
+* **External Market Analysis:** Scrape and analyze external job listings from SEEK, categorized by city, job title, and summary.
+* **Comparative Insights:** Combine and enrich internal and external datasets to gain comparative insights into the job market.
+* **Automated Data Ingestion:** Implement metadata-driven automation for scalable and efficient data ingestion pipelines.
 
 ---
 
 ## 🧩 SQL Server Data Warehouse
-Schemas & Tables
-HRDW.DimDepartment
 
-HRDW.DimLocation
+The project leverages a SQL Server Data Warehouse with the following schemas and tables:
 
-HRDW.FactJobOpening
+* `HRDW.DimDepartment`
+* `HRDW.DimLocation`
+* `HRDW.FactJobOpening`
+* `HRDW.IngestionControl`
+* `HRDW.Bronze_WebJobs`
 
-HRDW.IngestionControl
-
-HRDW.Bronze_WebJobs
-
-✅ Data is pre-populated with sample job roles, departments, cities.
+✅ The database is pre-populated with sample data encompassing job roles, departments, and cities for demonstration purposes.
 
 ---
 
 ## 🧪 Azure Data Factory (ADF)
-Uses Lookup activity to fetch ingestion metadata.
 
-ForEach activity iterates over sources.
+The Azure Data Factory pipeline is designed with a metadata-driven approach, utilizing the following activities:
 
-Switch handles SourceType logic (SQL or WEB).
+* **Lookup Activity:** Retrieves ingestion metadata from the `HRDW.IngestionControl` table.
+* **ForEach Activity:** Iterates through the configured data sources based on the metadata.
+* **Switch Activity:** Dynamically handles the logic for different `SourceType` values (e.g., SQL or WEB).
 
-Triggers:
+**Triggers:**
 
-PL_Copy_WebJobs_To_SQL: Executes Python web scraper.
-
-Uses parameters from control table.
+* `PL_Copy_WebJobs_To_SQL`: Executes the Python web scraping script to ingest data into the `Bronze_WebJobs` table.
+* The pipeline utilizes parameters defined in the `HRDW.IngestionControl` table for dynamic configuration.
 
 ---
 
 ## 🔁 Web Scraping (Python + Seek)
-Script: web_scrape_seek.py
 
-Inputs: JSON config (cities, keywords) from IngestionControl.
+The web scraping component utilizes a Python script (`web_scrape_seek.py`) to extract job posting data from SEEK.
 
-Output: Bronze_WebJobs SQL table.
-
-Parsed fields:
-
-JobTitle, Company, Location, City, Summary, Link
+* **Inputs:** Configuration parameters (cities, keywords) are dynamically retrieved from the `IngestionControl` table in JSON format.
+* **Output:** The scraped data is loaded into the `HRDW.Bronze_WebJobs` SQL table.
+* **Parsed Fields:**
+    * `JobTitle`
+    * `Company`
+    * `Location`
+    * `City`
+    * `Summary`
+    * `Link`
 
 ---
 
 ## 🔁 Databricks (Bronze → Silver → Gold)
-Bronze Layer: Raw ingestion tables (SQL + Web)
 
-Silver Layer: Cleaned, transformed job postings
+Azure Databricks is used for data processing and transformation, following a Medallion architecture:
 
-Gold Layer: Joined data for reporting
+* **Bronze Layer:** Stores raw data ingested from both SQL Server and the web scraping process.
+* **Silver Layer:** Contains cleaned and transformed job posting data, ready for further analysis.
+* **Gold Layer:** Provides aggregated and joined datasets optimized for reporting and analysis in Power BI.
 
 ---
 
 ## 📊 Power BI Dashboard
-Key Visuals:
 
-Open vs Closed Positions by City
+The Power BI dashboard provides interactive visualizations and insights into the job market data:
 
-Market Job Postings vs Internal Postings
+* **Key Visuals:**
+    * Comparison of Open vs. Closed Positions by City.
+    * Analysis of Market Job Postings versus Internal Postings.
+    * Frequency analysis of key skills mentioned in external job postings.
+    * Time-series analysis of job opening trends.
+* **Data Connectivity:** The dashboard connects directly to the Gold Layer in Databricks using either the SQL Analytics endpoint or Delta Sharing for efficient data retrieval.
 
-Skills Frequency in External Jobs
-
-Time-Series of Job Openings
-
-🔗 Connects directly to Gold Layer in Databricks via SQL Analytics endpoint or Delta Share.
-
+---
 ---
 
 ## ⚙️ Metadata Control Table
@@ -171,7 +155,7 @@ Python (with requests, beautifulsoup4)
 Steps
 Clone the repo:
 
-git clone https://github.com/your-username/job-market-analytics.git
+git clone https://github.com/raomohsin54/job-market-analytics.git
 cd job-market-analytics
 Run SQL scripts from data-ingestion folder to create schema and tables.
 
